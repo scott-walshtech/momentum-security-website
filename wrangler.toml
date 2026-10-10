@@ -1,0 +1,7 @@
+# Momentum Security Systems website — static assets only (no Worker script).
+# Lets the Cloudflare dashboard's git flow deploy with `npx wrangler deploy`.
+name = "momentum-security-website"
+compatibility_date = "2026-10-10"
+
+[assets]
+directory = "./public"

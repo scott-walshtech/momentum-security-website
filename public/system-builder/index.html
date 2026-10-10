@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Builder | Momentum Security Systems</title>
+  <meta name="description" content="Build your custom Momentum Security system and get an instant quote. Intrusion, CCTV, and automation — priced live.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/builder.css">
+  <!-- Cloudflare Web Analytics: enable in the Cloudflare dashboard, then uncomment and paste the token.
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "PASTE_TOKEN_HERE"}'></script>
+  -->
+  <link rel="icon" type="image/png" href="../assets/momentum-logo-icon.png">
+</head>
+<body>
+
+  <nav class="topnav">
+    <a class="brand" href="../">
+      <img src="../assets/momentum-logo-icon.png" alt="Momentum Security Systems logo">
+      <span>MOMENTUM <em>SECURITY</em></span>
+    </a>
+    <a class="btn btn-outline" href="../">Home</a>
+  </nav>
+
+  <div class="builder-wrap">
+    <a class="back-link" href="../">&larr; Back to home</a>
+
+    <div class="builder-header">
+      <img src="../assets/momentum-logo-icon.png" alt="Momentum Security Systems">
+      <h1>System Builder</h1>
+      <p>Interactive System Builder &amp; Quote Assistant</p>
+    </div>
+
+    <div id="loader" class="loader">Fetching real-time configurations&hellip;</div>
+
+    <div id="builder" class="hidden"></div>
+
+    <div class="totals-box">
+      <h2>Total Upfront: <span>$<span id="totalUpfront">0.00</span></span></h2>
+      <h2>Total Monthly: <span>$<span id="totalMonthly">0.00</span></span></h2>
+    </div>
+
+    <div class="lead-form">
+      <h3>Secure Your Estimate</h3>
+      <div class="input-group"><input type="text" id="custName" placeholder="Full Name" autocomplete="name"></div>
+      <div class="input-group"><input type="email" id="custEmail" placeholder="Email Address" autocomplete="email"></div>
+      <div class="input-group"><input type="tel" id="custPhone" placeholder="Phone Number" autocomplete="tel"></div>
+
+      <div class="btn-container">
+        <button class="btn-flex btn-callback" id="btnRequest" onclick="submitQuote('Call Back')">Request Call Back</button>
+        <button class="btn-flex btn-print" onclick="submitQuote('Print')">Save &amp; Print Quote</button>
+      </div>
+      <div id="statusMessage"></div>
+    </div>
+  </div>
+
+  <footer>
+    <img src="../assets/momentum-logo-stacked.png" alt="Momentum Security Systems">
+    <p>&copy; 2026 Momentum Security Systems. All Rights Reserved.</p>
+    <p class="fine">Locally Owned &amp; Operated &bull; Made on Canadian Soil</p>
+  </footer>
+
+  <script>
+    // Pricing + lead endpoint. Sudo replaces this with the real Apps Script web-app /exec URL at deploy time.
+    const PRICE_API_URL = 'https://script.google.com/macros/s/AKfycbxXxrnePcMA2gM6LRF-cuFbIXrcGkykAJ7f9OL2y3jXPD-HJt8x0meXZ1YLE_mof8a2JQ/exec';
+
+    var globalProducts = [];
+    var quantities = {};
+
+    window.onload = function() {
+      fetch(PRICE_API_URL)
+        .then(function(response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function(products) { buildWizard(products); })
+        .catch(function(err) {
+          var loader = document.getElementById('loader');
+          loader.classList.add('error');
+          loader.innerHTML = '<strong>Couldn\u2019t load live pricing.</strong>' +
+            'Please check your connection and refresh the page.<br>' +
+            '<span style="font-size:0.85rem; opacity:0.7;">(' + String(err).replace(/</g, '&lt;') + ')</span>';
+        });
+    };
+
+    function buildWizard(products) {
+      globalProducts = products;
+      var html = '';
+
+      // --- STEP 1: BASE SYSTEM ---
+      html += `<div class="category-section">
+                <div class="category-banner" id="banner-1">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>1. Choose Your System</h2>
+                    <p>Select a core deployment platform or transfer your coverage</p>
+                  </div>
+                </div>`;
+      products.forEach(function(p, i) {
+        if (p.name.includes('Basic') && p.name.includes('Alarm')) {
+          html += `<div class="product-row">
+                     <label class="row-label">
+                       <input type="radio" name="baseSystem" value="${i}" onchange="updateLogic()">
+                       <div class="text-details">
+                         <span class="product-name">${escapeHtml(p.name)}</span>
+                         <span class="product-price">$${p.upfrontCost.toFixed(2)} upfront</span>
+                       </div>
+                     </label>
+                   </div>`;
+        }
+      });
+      html += `<div class="product-row">
+                 <label class="row-label">
+                   <input type="radio" name="baseSystem" value="takeover" onchange="updateLogic()">
+                   <div class="text-details">
+                     <span class="product-name">I already have an existing system and would like it monitored by Momentum Security</span>
+                     <span class="product-price">$0.00 upfront</span>
+                   </div>
+                 </label>
+               </div>`;
+      html += '</div>';
+
+      // --- STEP 2: MONITORING PLAN ---
+      html += `<div id="step-plans" class="category-section hidden">
+                <div class="category-banner" id="banner-plans">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>2. Select Monitoring Plan</h2>
+                    <p id="planWarning" class="section-warning hidden">Please select a monitoring plan to continue.</p>
+                  </div>
+                </div>`;
+      products.forEach(function(p, i) {
+        if (p.category === 'Base Plan') {
+          var isLandline = p.name.toLowerCase().includes('landline');
+          html += `<div class="product-row plan-row ${isLandline ? 'is-landline' : 'is-cellular'}">
+                     <label class="row-label">
+                       <input type="radio" name="basePlan" value="${i}" onchange="updateLogic()">
+                       <div class="text-details">
+                         <span class="product-name">${escapeHtml(p.name)}</span>
+                         <span class="product-price">$${p.monthlyCost.toFixed(2)} / month</span>
+                       </div>
+                     </label>
+                   </div>`;
+        }
+      });
+      html += '</div>';
+
+      // --- INTERMEDIARY HARDWARE TAKE-OVER DECISION ---
+      html += `<div id="step-takeover-decision" class="category-section hidden">
+                <div class="category-banner" id="banner-takeover">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14h-2v-2h2zm0-4h-2V7h2z"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>3. Hardware Additions</h2>
+                    <p>Would you like to expand your existing hardware layout?</p>
+                  </div>
+                </div>
+                <div class="product-row">
+                  <label class="row-label">
+                    <input type="radio" name="hardwareDecision" value="yes" onchange="updateLogic()">
+                    <div class="text-details"><span class="product-name">I would like to add additional devices?</span></div>
+                  </label>
+                </div>
+                <div class="product-row">
+                  <label class="row-label">
+                    <input type="radio" name="hardwareDecision" value="no" onchange="updateLogic()">
+                    <div class="text-details"><span class="product-name">I&rsquo;m happy with what I have</span></div>
+                  </label>
+                </div>
+              </div>`;
+
+      // --- STEP 4: DEVICES ---
+      html += `<div id="step-devices" class="category-section hidden">
+                <div class="category-banner" id="banner-devices">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>4. Add Devices</h2>
+                    <p>Incorporate premium hardwired or wireless sensor integrations</p>
+                  </div>
+                </div>`;
+      products.forEach(function(p, i) {
+        var pType = (p.type || '').toLowerCase();
+        if ((p.category === 'Intrusion' || p.category === 'Automation') && !p.name.includes('Basic')) {
+          var typeClass = '';
+          if (pType === 'hw') typeClass = 'is-hardwired';
+          else if (pType === 'wls') typeClass = 'is-wireless';
+          else if (pType === 'auto' || p.category === 'Automation') typeClass = 'is-auto-device';
+          quantities[i] = 0;
+
+          html += `<div class="product-row device-row ${typeClass}">
+                     <div class="text-details">
+                       <span class="product-name">${escapeHtml(p.name)}</span>
+                       <span class="product-price">$${p.upfrontCost.toFixed(2)} / unit</span>
+                     </div>
+                     <div class="qty-container">
+                       <button class="qty-btn" type="button" onclick="adjustQty(${i}, -1)" aria-label="Decrease quantity">&minus;</button>
+                       <div class="qty-display" id="display_${i}">0</div>
+                       <button class="qty-btn" type="button" onclick="adjustQty(${i}, 1)" aria-label="Increase quantity">+</button>
+                     </div>
+                   </div>`;
+        }
+      });
+      html += '</div>';
+
+      // --- STEP 5: CAMERAS ---
+      html += `<div id="step-cameras" class="category-section hidden">
+                <div class="category-banner" id="banner-cameras">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>5. Add Cameras</h2>
+                    <p>High-Definition surveillance modules and analytical CCTV arrays</p>
+                  </div>
+                </div>`;
+      products.forEach(function(p, i) {
+        if (p.category === 'CCTV' || (p.type || '').toLowerCase() === 'cam') {
+          quantities[i] = 0;
+          html += `<div class="product-row is-cctv">
+                     <div class="text-details">
+                       <span class="product-name">${escapeHtml(p.name)}</span>
+                       <span class="product-price">$${p.upfrontCost.toFixed(2)} / camera</span>
+                     </div>
+                     <div class="qty-container">
+                       <button class="qty-btn" type="button" onclick="adjustQty(${i}, -1)" aria-label="Decrease quantity">&minus;</button>
+                       <div class="qty-display" id="display_${i}">0</div>
+                       <button class="qty-btn" type="button" onclick="adjustQty(${i}, 1)" aria-label="Increase quantity">+</button>
+                     </div>
+                   </div>`;
+        }
+      });
+      html += '</div>';
+
+      // --- STEP 6: MONTHLY ADD-ONS ---
+      html += `<div id="step-addons" class="category-section hidden">
+                <div class="category-banner" id="banner-addons">
+                  <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  </div>
+                  <div class="banner-text">
+                    <h2>6. Monthly Add-ons</h2>
+                    <p id="camWarning" class="section-warning hidden">Please select a Camera monthly add-on plan to support your configurations.</p>
+                  </div>
+                </div>`;
+      products.forEach(function(p, i) {
+        if (p.category === 'Monthly Add-on') {
+          var pNameLower = p.name.toLowerCase();
+
+          if (pNameLower.includes('pro video') || pNameLower.includes('basic cameras')) {
+            html += `<div class="product-row addon-row is-cam-addon">
+                       <label class="row-label">
+                         <input type="checkbox" id="check_${i}" onchange="updateLogic()">
+                         <div class="text-details">
+                           <span class="product-name">${escapeHtml(p.name)}</span>
+                           <span class="product-price">$${p.monthlyCost.toFixed(2)} / month</span>
+                         </div>
+                       </label>
+                     </div>`;
+          } else if (pNameLower.includes('4 aditional') || pNameLower.includes('4 additional')) {
+            quantities[i] = 0;
+            html += `<div class="product-row addon-row is-multi-cam-addon hidden">
+                       <label class="row-label">
+                         <input type="checkbox" id="check_${i}" disabled>
+                         <div class="text-details">
+                           <span class="product-name">${escapeHtml(p.name)} <span class="auto-calc-text">(Auto-applied block)</span></span>
+                           <span class="product-price">$${p.monthlyCost.toFixed(2)} / month</span>
+                         </div>
+                       </label>
+                       <div class="qty-container" style="opacity: 0.6;">
+                         <div class="qty-display" id="display_${i}" style="border: none; width: 60px;">0 blocks</div>
+                       </div>
+                     </div>`;
+          } else if (pNameLower.includes('automation devices')) {
+            html += `<div class="product-row addon-row is-auto-addon hidden">
+                       <label class="row-label">
+                         <input type="checkbox" id="check_${i}" disabled>
+                         <div class="text-details">
+                           <span class="product-name">${escapeHtml(p.name)} <span class="auto-calc-text">(Auto-applied)</span></span>
+                           <span class="product-price">$${p.monthlyCost.toFixed(2)} / month</span>
+                         </div>
+                       </label>
+                     </div>`;
+          } else {
+            html += `<div class="product-row addon-row">
+                       <label class="row-label">
+                         <input type="checkbox" id="check_${i}" onchange="updateLogic()">
+                         <div class="text-details">
+                           <span class="product-name">${escapeHtml(p.name)}</span>
+                           <span class="product-price">$${p.monthlyCost.toFixed(2)} / month</span>
+                         </div>
+                       </label>
+                     </div>`;
+          }
+        }
+      });
+      html += '</div>';
+
+      document.getElementById('builder').innerHTML = html;
+      document.getElementById('loader').classList.add('hidden');
+      document.getElementById('builder').classList.remove('hidden');
+      document.getElementById('btnRequest').disabled = true;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function(c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function adjustQty(index, change) {
+      var current = quantities[index] || 0;
+      var newVal = current + change;
+      if (newVal < 0) newVal = 0;
+      quantities[index] = newVal;
+
+      var displayEl = document.getElementById('display_' + index);
+      if (displayEl) {
+        displayEl.innerText = newVal;
+      }
+      updateLogic();
+    }
+
+    function updateLogic() {
+      var sysChoice = '', sysIndex = -1, planSelected = false;
+      var isTakeover = false;
+
+      document.getElementsByName('baseSystem').forEach(r => {
+        if (r.checked) {
+          if (r.value === 'takeover') {
+            isTakeover = true;
+            sysChoice = 'takeover';
+          } else {
+            sysIndex = parseInt(r.value, 10);
+            sysChoice = globalProducts[sysIndex].name.toLowerCase().includes('wireless') ? 'wireless' : 'hardwired';
+          }
+        }
+      });
+
+      document.getElementsByName('basePlan').forEach(r => { if (r.checked) planSelected = true; });
+
+      // Step Visibility Triggers
+      if (sysChoice !== '') {
+        document.getElementById('step-plans').classList.remove('hidden');
+        if (isTakeover) {
+          document.getElementById('step-takeover-decision').classList.remove('hidden');
+        } else {
+          document.getElementById('step-takeover-decision').classList.add('hidden');
+        }
+      }
+
+      // Evaluate dynamic Hardware Addition trees
+      var showHardwareAddons = false;
+      if (!isTakeover && sysChoice !== '') {
+        showHardwareAddons = true;
+      } else if (isTakeover) {
+        var decision = '';
+        document.getElementsByName('hardwareDecision').forEach(r => { if (r.checked) decision = r.value; });
+        if (decision === 'yes') {
+          showHardwareAddons = true;
+        } else if (decision === 'no') {
+          // Nullify saved configurations if toggled back out
+          globalProducts.forEach((p, i) => {
+            if (quantities[i] !== undefined) {
+              quantities[i] = 0;
+              var el = document.getElementById('display_' + i);
+              if (el) el.innerText = '0';
+            }
+          });
+          document.querySelectorAll('#step-addons input[type="checkbox"]').forEach(el => el.checked = false);
+        }
+      }
+
+      if (showHardwareAddons) {
+        document.getElementById('step-devices').classList.remove('hidden');
+        document.getElementById('step-cameras').classList.remove('hidden');
+        document.getElementById('step-addons').classList.remove('hidden');
+      } else {
+        document.getElementById('step-devices').classList.add('hidden');
+        document.getElementById('step-cameras').classList.add('hidden');
+        document.getElementById('step-addons').classList.add('hidden');
+      }
+
+      // Apply Pathway Locking (Wireless vs Hardwired dependencies)
+      document.querySelectorAll('.device-row').forEach(row => {
+        if (sysChoice === 'wireless' && row.classList.contains('is-hardwired')) {
+          row.classList.add('hidden');
+          var inputId = row.querySelector('.qty-display') ? row.querySelector('.qty-display').id.split('_')[1] : null;
+          if (inputId) { quantities[inputId] = 0; document.getElementById('display_' + inputId).innerText = '0'; }
+        } else {
+          row.classList.remove('hidden');
+        }
+      });
+
+      document.querySelectorAll('.plan-row').forEach(row => {
+        if (sysChoice === 'wireless' && row.classList.contains('is-landline')) {
+          row.classList.add('hidden');
+          row.querySelector('input').checked = false;
+        } else {
+          row.classList.remove('hidden');
+        }
+      });
+
+      // --- CCTV AUTOMATIONS ---
+      var camQty = 0;
+      globalProducts.forEach((p, i) => {
+        if (p.category === 'CCTV' || (p.type || '').toLowerCase() === 'cam') {
+          camQty += (quantities[i] || 0);
+        }
+      });
+
+      document.querySelectorAll('.is-cam-addon').forEach(row => {
+        row.classList.toggle('hidden', camQty === 0);
+        if (camQty === 0) row.querySelector('input[type="checkbox"]').checked = false;
+      });
+
+      var hasCamAddon = false;
+      document.querySelectorAll('.is-cam-addon input[type="checkbox"]').forEach(cb => { if (cb.checked) hasCamAddon = true; });
+
+      document.querySelectorAll('.is-multi-cam-addon').forEach(row => {
+        var cb = row.querySelector('input[type="checkbox"]');
+        var blockId = cb.id.split('_')[1];
+        if (camQty >= 5) {
+          row.classList.remove('hidden');
+          cb.checked = true;
+          var blocks = Math.ceil((camQty - 4) / 4);
+          quantities[blockId] = blocks;
+          document.getElementById('display_' + blockId).innerText = blocks + ' block' + (blocks > 1 ? 's' : '');
+        } else {
+          row.classList.add('hidden');
+          cb.checked = false;
+          quantities[blockId] = 0;
+        }
+      });
+
+      // --- AUTOMATION LAYER AUTOMATIONS ---
+      var autoQty = 0;
+      globalProducts.forEach((p, i) => {
+        if (p.category === 'Automation' || (p.type && p.type.toLowerCase() === 'auto')) {
+          autoQty += (quantities[i] || 0);
+        }
+      });
+
+      document.querySelectorAll('.is-auto-addon').forEach(row => {
+        row.classList.toggle('hidden', autoQty === 0);
+        var cb = row.querySelector('input[type="checkbox"]');
+        cb.checked = (autoQty > 0);
+      });
+
+      // --- COMPLIANCE VALIDATIONS ---
+      var btn = document.getElementById('btnRequest');
+      var planWarning = document.getElementById('planWarning');
+      var camWarning = document.getElementById('camWarning');
+      var isFormInvalid = false;
+
+      if (!planSelected) { planWarning.classList.remove('hidden'); isFormInvalid = true; }
+      else { planWarning.classList.add('hidden'); }
+
+      if (camQty > 0 && !hasCamAddon) { camWarning.classList.remove('hidden'); isFormInvalid = true; }
+      else { camWarning.classList.add('hidden'); }
+
+      if (isTakeover) {
+        var answeredDecision = false;
+        document.getElementsByName('hardwareDecision').forEach(r => { if (r.checked) answeredDecision = true; });
+        if (!answeredDecision) isFormInvalid = true;
+      }
+
+      btn.disabled = isFormInvalid;
+      if (!isFormInvalid) document.getElementById('statusMessage').innerText = '';
+
+      calculateMath();
+    }
+
+    function calculateMath() {
+      var up = 0, mo = 0;
+
+      document.getElementsByName('baseSystem').forEach(r => { if (r.checked && r.value !== 'takeover') up += globalProducts[r.value].upfrontCost; });
+      document.getElementsByName('basePlan').forEach(r => { if (r.checked) mo += globalProducts[r.value].monthlyCost; });
+
+      globalProducts.forEach((p, i) => {
+        var qty = quantities[i] || 0;
+        var displayEl = document.getElementById('display_' + i);
+        var isHidden = displayEl ? displayEl.closest('.category-section').classList.contains('hidden') : false;
+
+        if (qty > 0 && !isHidden) {
+          up += (p.upfrontCost * qty);
+          mo += (p.monthlyCost * qty);
+        }
+      });
+
+      document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        var sectionHidden = input.closest('.category-section').classList.contains('hidden');
+        var i = input.id.split('_')[1];
+        // Checkboxes that use independent tracking formulas shouldn't double count costs here
+        var hasQtyCounter = (quantities[i] !== undefined);
+
+        if (input.checked && !sectionHidden && !hasQtyCounter) {
+          mo += globalProducts[i].monthlyCost;
+        }
+      });
+
+      document.getElementById('totalUpfront').innerText = up.toFixed(2);
+      document.getElementById('totalMonthly').innerText = mo.toFixed(2);
+    }
+
+    function submitQuote(actionType) {
+      var name = document.getElementById('custName').value,
+          email = document.getElementById('custEmail').value,
+          phone = document.getElementById('custPhone').value;
+      if (!name || !email || !phone) { alert('Please fill in your contact info.'); return; }
+
+      var summary = '';
+      document.getElementsByName('baseSystem').forEach(r => {
+        if (r.checked) {
+          if (r.value === 'takeover') summary += 'System Pathway: Existing Takeover (No Base Purchase)\n';
+          else summary += '1x ' + globalProducts[r.value].name + '\n';
+        }
+      });
+
+      document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+        if (r.name === 'basePlan') summary += 'Monitoring Package: ' + globalProducts[r.value].name + '\n';
+      });
+
+      globalProducts.forEach((p, i) => {
+        var qty = quantities[i] || 0;
+        var displayEl = document.getElementById('display_' + i);
+        var isHidden = displayEl ? (displayEl.closest('.category-section').classList.contains('hidden') || displayEl.closest('.product-row').classList.contains('hidden')) : false;
+
+        if (qty > 0 && !isHidden) {
+          summary += qty + 'x ' + p.name + '\n';
+        }
+      });
+
+      document.querySelectorAll('input[type="checkbox"]:checked').forEach(input => {
+        var i = input.id.split('_')[1];
+        if (quantities[i] === undefined && !input.closest('.category-section').classList.contains('hidden')) {
+          summary += '1x ' + globalProducts[i].name + '\n';
+        }
+      });
+
+      var statusEl = document.getElementById('statusMessage');
+      statusEl.innerText = 'Saving your quote...';
+      statusEl.style.color = '#00CBFF';
+
+      var params = 'action=submitLead'
+        + '&name=' + encodeURIComponent(name)
+        + '&email=' + encodeURIComponent(email)
+        + '&phone=' + encodeURIComponent(phone)
+        + '&actionType=' + encodeURIComponent(actionType)
+        + '&totalUpfront=' + encodeURIComponent(document.getElementById('totalUpfront').innerText)
+        + '&totalMonthly=' + encodeURIComponent(document.getElementById('totalMonthly').innerText)
+        + '&summary=' + encodeURIComponent(summary);
+
+      fetch(PRICE_API_URL + '?' + params)
+        .then(function(response) {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.json();
+        })
+        .then(function(data) {
+          if (data && data.status === 'ok') {
+            statusEl.innerText = 'Quote saved successfully!';
+            statusEl.style.color = '#10b981';
+            if (actionType === 'Print') window.print();
+          } else {
+            statusEl.innerText = 'Error: ' + ((data && data.message) || 'unknown error');
+            statusEl.style.color = '#f43f5e';
+          }
+        })
+        .catch(function(err) {
+          statusEl.innerText = 'Error saving your quote — please try again or call 306-501-8050.';
+          statusEl.style.color = '#f43f5e';
+        });
+    }
+  </script>
+
+</body>
+</html>
