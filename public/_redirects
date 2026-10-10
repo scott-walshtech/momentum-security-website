@@ -1,4 +1,0 @@
-# Canonical domain: apex wins, www redirects here (preserves path)
-https://www.momentumsecurity.ca/* https://momentumsecurity.ca/:splat 301!
-http://www.momentumsecurity.ca/* https://momentumsecurity.ca/:splat 301!
-http://momentumsecurity.ca/* https://momentumsecurity.ca/:splat 301!
