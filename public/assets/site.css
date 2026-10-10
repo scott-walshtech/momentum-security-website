@@ -325,8 +325,9 @@ footer img { height: 54px; width: auto; margin-bottom: 14px; opacity: 0.9; }
 @media (max-width: 640px) {
   .hero-headline { letter-spacing: 0.5px; }
   .pricing-strip { padding: 48px 20px; }
+  .topnav { padding: 12px 16px; }
   .topnav .btn { padding: 10px 14px; font-size: 0.78rem; white-space: nowrap; }
-  .topnav .brand span { font-size: 0.82rem; letter-spacing: 1px; white-space: nowrap; }
+  .topnav .brand span { display: none; }
   .topnav .brand img { height: 36px; }
   .nav-links { gap: 16px; }
   .nav-link { font-size: 0.78rem; letter-spacing: 1px; }
