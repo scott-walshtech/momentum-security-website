@@ -306,4 +306,74 @@ footer img { height: 54px; width: auto; margin-bottom: 14px; opacity: 0.9; }
   .topnav .btn { padding: 10px 14px; font-size: 0.78rem; white-space: nowrap; }
   .topnav .brand span { font-size: 0.82rem; letter-spacing: 1px; white-space: nowrap; }
   .topnav .brand img { height: 36px; }
+  .nav-links { gap: 16px; }
+  .nav-link { font-size: 0.78rem; letter-spacing: 1px; }
 }
+
+/* --- About page --- */
+.nav-links { display: flex; align-items: center; gap: 26px; }
+.nav-link {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.nav-link:hover { color: var(--accent); }
+.nav-link.current { color: var(--accent); }
+
+.hero-short { min-height: 58vh; }
+
+.story { max-width: 780px; margin: 0 auto; }
+.story p { color: #c9d2de; font-size: 1.08rem; margin-bottom: 22px; }
+.story p:last-child { margin-bottom: 0; }
+
+.mission-band {
+  background: linear-gradient(135deg, #00203f 0%, #004080 55%, #00203f 100%);
+  border-top: 1px solid rgba(0, 203, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 203, 255, 0.35);
+  padding: 76px 20px;
+}
+.mission-inner { max-width: 780px; margin: 0 auto; }
+.mission-inner p { color: #dfe7f2; font-size: 1.08rem; margin-bottom: 20px; }
+.mission-inner p:last-child { margin-bottom: 0; }
+.mission-inner .standout { font-size: 1.35rem; font-weight: 700; color: var(--text); }
+.mission-inner strong { color: var(--text); }
+.commit-title {
+  font-size: 1.35rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 32px 0 20px;
+}
+.commit-list { list-style: none; margin-bottom: 28px; }
+.commit-list li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 18px;
+  color: #dfe7f2;
+  font-size: 1.05rem;
+}
+.commit-list li:last-child { margin-bottom: 0; }
+.commit-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.52em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(0, 203, 255, 0.7);
+}
+
+.contact-strip {
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+.contact-strip a { color: var(--accent); text-decoration: none; font-weight: 700; }
+.contact-strip a:hover { text-decoration: underline; }
