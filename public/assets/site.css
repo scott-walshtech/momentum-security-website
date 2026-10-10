@@ -119,13 +119,15 @@ a { color: var(--accent); }
   margin-bottom: 34px;
 }
 .hero-stats {
-  display: flex;
-  gap: 36px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 640px;
 }
 .hero-stat {
   display: flex;
   flex-direction: column;
+  text-align: center;
 }
 .hero-stat strong {
   font-family: var(--font-head);
