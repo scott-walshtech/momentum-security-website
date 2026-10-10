@@ -14,6 +14,116 @@
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "PASTE_TOKEN_HERE"}'></script>
   -->
   <link rel="icon" type="image/png" href="../assets/momentum-logo-icon.png">
+  <style>
+    /* ---------- Printable single-page quote ---------- */
+    #print-quote { display: none; }
+
+    @media print {
+      @page { margin: 11mm 12mm; }
+
+      body { background: #fff !important; }
+      body > *:not(#print-quote) { display: none !important; }
+
+      #print-quote {
+        display: block !important;
+        background: #fff;
+        color: #1a1a1a;
+        font-family: 'Lato', Arial, sans-serif;
+        font-size: 11px;
+        line-height: 1.45;
+      }
+      #print-quote .pq-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 3px solid #007BFF;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+      }
+      #print-quote .pq-header img { height: 54px; width: auto; }
+      #print-quote .pq-brand h1 {
+        font-family: 'Oswald', Arial, sans-serif;
+        font-size: 20px;
+        letter-spacing: 1.5px;
+        margin: 0;
+        color: #111;
+      }
+      #print-quote .pq-brand h1 span { color: #007BFF; }
+      #print-quote .pq-brand p {
+        margin: 2px 0 0;
+        font-size: 12px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #555;
+      }
+      #print-quote .pq-date {
+        margin-left: auto;
+        font-size: 11px;
+        color: #555;
+        white-space: nowrap;
+      }
+      #print-quote .pq-customer {
+        background: #f4f7fb;
+        border: 1px solid #dbe4f0;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+      }
+      #print-quote .pq-customer .pq-label {
+        color: #007BFF;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+      #print-quote .pq-customer .pq-cust-name { font-weight: 700; font-size: 12px; }
+      #print-quote table.pq-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        font-size: 11px;
+      }
+      #print-quote .pq-table th {
+        background: #007BFF;
+        color: #fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-family: 'Oswald', Arial, sans-serif;
+        font-weight: 500;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 10px;
+        text-align: left;
+        padding: 6px 8px;
+      }
+      #print-quote .pq-table th.pq-num,
+      #print-quote .pq-table td.pq-num { text-align: right; white-space: nowrap; }
+      #print-quote .pq-table td { padding: 5px 8px; border-bottom: 1px solid #e3e8f0; }
+      #print-quote .pq-table tr { page-break-inside: avoid; }
+      #print-quote .pq-table tfoot td {
+        border-bottom: none;
+        border-top: 2px solid #007BFF;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 7px 8px;
+      }
+      #print-quote .pq-footer {
+        text-align: center;
+        color: #555;
+        font-size: 10px;
+        margin-top: 8px;
+        border-top: 1px solid #dbe4f0;
+        padding-top: 8px;
+      }
+      #print-quote .pq-footer .pq-thanks {
+        font-family: 'Oswald', Arial, sans-serif;
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: #007BFF;
+        margin-bottom: 4px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -62,6 +172,8 @@
     <p>&copy; 2026 Momentum Security Systems. All Rights Reserved.</p>
     <p class="fine">Locally Owned &amp; Operated &bull; Made on Canadian Soil</p>
   </footer>
+
+  <div id="print-quote" aria-hidden="true"></div>
 
   <script>
     // Pricing + lead endpoint. Sudo replaces this with the real Apps Script web-app /exec URL at deploy time.
@@ -512,6 +624,105 @@
       document.getElementById('totalMonthly').innerText = mo.toFixed(2);
     }
 
+    function money(n) {
+      return '$' + Number(n).toFixed(2);
+    }
+
+    // Collects the printable line items using the EXACT same
+    // visibility/exclusion rules as calculateMath(), so the quote
+    // totals always match the on-screen totals:
+    //   base system -> upfront only | base plan -> monthly only |
+    //   qty items -> upfront + monthly | add-on checkboxes -> monthly only
+    function collectQuoteItems() {
+      var items = [];
+
+      document.getElementsByName('baseSystem').forEach(function(r) {
+        if (r.checked && r.value !== 'takeover') {
+          var p = globalProducts[r.value];
+          items.push({ name: p.name, qty: 1, upfront: p.upfrontCost, monthly: 0 });
+        } else if (r.checked && r.value === 'takeover') {
+          items.push({ name: 'Existing system takeover (monitoring only)', qty: 1, upfront: 0, monthly: 0 });
+        }
+      });
+
+      document.getElementsByName('basePlan').forEach(function(r) {
+        if (r.checked) {
+          var p = globalProducts[r.value];
+          items.push({ name: p.name + ' (monitoring plan)', qty: 1, upfront: 0, monthly: p.monthlyCost });
+        }
+      });
+
+      globalProducts.forEach(function(p, i) {
+        var qty = quantities[i] || 0;
+        var displayEl = document.getElementById('display_' + i);
+        var isHidden = displayEl ? displayEl.closest('.category-section').classList.contains('hidden') : false;
+
+        if (qty > 0 && !isHidden) {
+          items.push({ name: p.name, qty: qty, upfront: p.upfrontCost, monthly: p.monthlyCost });
+        }
+      });
+
+      document.querySelectorAll('input[type="checkbox"]').forEach(function(input) {
+        var sectionHidden = input.closest('.category-section').classList.contains('hidden');
+        var i = input.id.split('_')[1];
+        // Checkboxes that use independent tracking formulas shouldn't double count costs here
+        var hasQtyCounter = (quantities[i] !== undefined);
+
+        if (input.checked && !sectionHidden && !hasQtyCounter) {
+          var p = globalProducts[i];
+          items.push({ name: p.name, qty: 1, upfront: 0, monthly: p.monthlyCost });
+        }
+      });
+
+      return items;
+    }
+
+    function buildPrintableQuote() {
+      var items = collectQuoteItems();
+      var totalUp = 0, totalMo = 0;
+      var rows = '';
+
+      items.forEach(function(it) {
+        var upT = it.upfront * it.qty;
+        var moT = it.monthly * it.qty;
+        totalUp += upT;
+        totalMo += moT;
+        rows += '<tr>'
+          + '<td>' + escapeHtml(it.name) + '</td>'
+          + '<td class="pq-num">' + it.qty + '</td>'
+          + '<td class="pq-num">' + (upT ? money(upT) : '&ndash;') + '</td>'
+          + '<td class="pq-num">' + (moT ? money(moT) : '&ndash;') + '</td>'
+          + '</tr>';
+      });
+
+      var name = document.getElementById('custName').value;
+      var email = document.getElementById('custEmail').value;
+      var phone = document.getElementById('custPhone').value;
+      var dateStr = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      document.getElementById('print-quote').innerHTML =
+        '<div class="pq-header">'
+        + '<img src="../assets/momentum-logo-stacked.png" alt="Momentum Security Systems">'
+        + '<div class="pq-brand"><h1>MOMENTUM <span>SECURITY</span> SYSTEMS</h1><p>System Quote</p></div>'
+        + '<div class="pq-date">' + escapeHtml(dateStr) + '</div>'
+        + '</div>'
+        + '<div class="pq-customer">'
+        + '<div class="pq-label">Prepared for</div>'
+        + '<div class="pq-cust-name">' + escapeHtml(name) + '</div>'
+        + '<div>' + escapeHtml(email) + ' &nbsp;&bull;&nbsp; ' + escapeHtml(phone) + '</div>'
+        + '</div>'
+        + '<table class="pq-table">'
+        + '<thead><tr><th>Item</th><th class="pq-num">Qty</th><th class="pq-num">Upfront</th><th class="pq-num">Monthly</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '<tfoot><tr><td colspan="2">Total</td><td class="pq-num">' + money(totalUp) + '</td><td class="pq-num">' + money(totalMo) + '</td></tr></tfoot>'
+        + '</table>'
+        + '<div class="pq-footer">'
+        + '<div class="pq-thanks">Thank you for choosing Momentum Security Systems.</div>'
+        + '<div>306-501-8050 &nbsp;&bull;&nbsp; scott@momentumsecurity.ca &nbsp;&bull;&nbsp; Regina, SK</div>'
+        + '<div>Locally Owned &amp; Operated &nbsp;&bull;&nbsp; 100% Canadian Monitoring</div>'
+        + '</div>';
+    }
+
     function submitQuote(actionType) {
       var name = document.getElementById('custName').value,
           email = document.getElementById('custEmail').value,
@@ -569,7 +780,7 @@
           if (data && data.status === 'ok') {
             statusEl.innerText = 'Quote saved successfully!';
             statusEl.style.color = '#10b981';
-            if (actionType === 'Print') window.print();
+            if (actionType === 'Print') { buildPrintableQuote(); window.print(); }
           } else {
             statusEl.innerText = 'Error: ' + ((data && data.message) || 'unknown error');
             statusEl.style.color = '#f43f5e';
