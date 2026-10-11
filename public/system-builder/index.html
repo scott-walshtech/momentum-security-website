@@ -369,7 +369,7 @@
                   </div>
                   <div class="banner-text">
                     <h2>6. Monthly Add-ons</h2>
-                    <p id="camWarning" class="section-warning hidden">Please select a Camera monthly add-on plan to support your configurations.</p>
+                    <p id="camWarning" class="section-warning hidden">Required: select a video package below &mdash; your cameras need one to work.</p>
                   </div>
                 </div>`;
       products.forEach(function(p, i) {
@@ -531,6 +531,7 @@
       });
 
       // --- CCTV AUTOMATIONS ---
+      var prevCamQty = window._prevCamQty || 0;
       var camQty = 0;
       globalProducts.forEach((p, i) => {
         if (p.category === 'CCTV' || (p.type || '').toLowerCase() === 'cam') {
@@ -542,6 +543,19 @@
         row.classList.toggle('hidden', camQty === 0);
         if (camQty === 0) row.querySelector('input[type="checkbox"]').checked = false;
       });
+
+      // First camera added: flash the mandatory video plan choices and scroll them into view
+      if (prevCamQty === 0 && camQty > 0) {
+        var camAddonRows = document.querySelectorAll('.is-cam-addon');
+        camAddonRows.forEach(function(row) {
+          row.classList.remove('flash-attention');
+          void row.offsetWidth;
+          row.classList.add('flash-attention');
+          setTimeout(function() { row.classList.remove('flash-attention'); }, 4500);
+        });
+        if (camAddonRows.length) camAddonRows[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      window._prevCamQty = camQty;
 
       var hasCamAddon = false;
       document.querySelectorAll('.is-cam-addon input[type="checkbox"]').forEach(cb => { if (cb.checked) hasCamAddon = true; });
