@@ -112,6 +112,7 @@ input[type="radio"], input[type="checkbox"] { transform: scale(1.3); margin-righ
 .hidden { display: none !important; }
 .auto-calc-text { font-size: 0.75rem; color: var(--danger); font-style: italic; margin-left: 8px; }
 .section-warning { font-size: 0.82rem; color: var(--danger); font-weight: 700; font-style: italic; display: block; margin-top: 4px; }
+.section-note { font-size: 0.82rem; color: var(--accent); font-weight: 600; display: block; margin-top: 4px; }
 #camWarning { font-size: 0.92rem; font-style: normal; background: rgba(244,63,94,.12); border: 1px solid var(--danger); border-radius: 6px; padding: 8px 12px; margin: 8px 0 4px; }
 
 /* Attention flash for mandatory choices (e.g. video plan when first camera is added) */

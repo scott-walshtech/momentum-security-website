@@ -254,6 +254,7 @@
                   <div class="banner-text">
                     <h2>2. Select Monitoring Plan</h2>
                     <p id="planWarning" class="section-warning hidden">Please select a monitoring plan to continue.</p>
+                    <p id="planAutoNote" class="section-note hidden"></p>
                   </div>
                 </div>`;
       products.forEach(function(p, i) {
@@ -584,11 +585,38 @@
         }
       });
 
-      document.querySelectorAll('.is-auto-addon').forEach(row => {
-        row.classList.toggle('hidden', autoQty === 0);
-        var cb = row.querySelector('input[type="checkbox"]');
-        cb.checked = (autoQty > 0);
-      });
+      // Smart rule (Scott 2026-10-10): any automation device => the customer
+      // belongs on the app-based plan (Interactive + Automation). Auto-select
+      // the cheapest app-capable base plan — no automation add-on needed,
+      // which is also the most cost-effective option for the customer.
+      var showAutoPlanNote = false;
+      if (autoQty > 0) {
+        var appPlanIdx = -1;
+        globalProducts.forEach((p, i) => {
+          if (p.category === 'Base Plan' && p.name.toLowerCase().includes('remote access app')) {
+            if (appPlanIdx === -1 || p.monthlyCost < globalProducts[appPlanIdx].monthlyCost) appPlanIdx = i;
+          }
+        });
+        if (appPlanIdx !== -1) {
+          var curPlan = document.querySelector('input[name="basePlan"]:checked');
+          var curPlanIdx = curPlan ? parseInt(curPlan.value, 10) : -1;
+          if (curPlanIdx !== appPlanIdx) {
+            document.getElementsByName('basePlan').forEach(r => {
+              r.checked = (parseInt(r.value, 10) === appPlanIdx);
+            });
+            planSelected = true;
+            showAutoPlanNote = true;
+            document.getElementById('planAutoNote').innerHTML =
+              'Automation devices need app control &mdash; you&rsquo;re on the <strong>' +
+              escapeHtml(globalProducts[appPlanIdx].name) + '</strong> (best value).';
+          } else {
+            showAutoPlanNote = (window._planBumpedForAutomation === true);
+          }
+        }
+      }
+      window._planBumpedForAutomation = showAutoPlanNote;
+      var planAutoNote = document.getElementById('planAutoNote');
+      if (planAutoNote) planAutoNote.classList.toggle('hidden', !showAutoPlanNote);
 
       // --- COMPLIANCE VALIDATIONS ---
       var btn = document.getElementById('btnRequest');
