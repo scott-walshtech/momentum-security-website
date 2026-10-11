@@ -737,6 +737,16 @@
           phone = document.getElementById('custPhone').value;
       if (!name || !email || !phone) { alert('Please fill in your contact info.'); return; }
 
+      var printedNow = false;
+      if (actionType === 'Print') {
+        // Print synchronously inside the tap gesture: mobile browsers ignore
+        // window.print() when it's called from an async (fetch) callback.
+        // The lead save below still runs — it just no longer gates printing.
+        buildPrintableQuote();
+        window.print();
+        printedNow = true;
+      }
+
       var summary = '';
       document.getElementsByName('baseSystem').forEach(r => {
         if (r.checked) {
@@ -788,7 +798,7 @@
           if (data && data.status === 'ok') {
             statusEl.innerText = 'Quote saved successfully!';
             statusEl.style.color = '#10b981';
-            if (actionType === 'Print') { buildPrintableQuote(); window.print(); }
+            if (actionType === 'Print' && !printedNow) { buildPrintableQuote(); window.print(); }
           } else {
             statusEl.innerText = 'Error: ' + ((data && data.message) || 'unknown error');
             statusEl.style.color = '#f43f5e';
