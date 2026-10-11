@@ -169,7 +169,7 @@
 
       <div class="btn-container">
         <button class="btn-flex btn-callback" id="btnRequest" onclick="submitQuote('Call Back')">Request Call Back</button>
-        <button class="btn-flex btn-print" onclick="submitQuote('Print')">Save &amp; Print Quote</button>
+        <button class="btn-flex btn-print" id="btnPrint" onclick="submitQuote('Print')">Save &amp; Print Quote</button>
       </div>
       <div id="statusMessage"></div>
     </div>
@@ -578,6 +578,7 @@
 
       // --- COMPLIANCE VALIDATIONS ---
       var btn = document.getElementById('btnRequest');
+      var btnPrint = document.getElementById('btnPrint');
       var planWarning = document.getElementById('planWarning');
       var camWarning = document.getElementById('camWarning');
       var isFormInvalid = false;
@@ -595,6 +596,7 @@
       }
 
       btn.disabled = isFormInvalid;
+      if (btnPrint) btnPrint.disabled = isFormInvalid;
       if (!isFormInvalid) document.getElementById('statusMessage').innerText = '';
 
       calculateMath();
@@ -736,6 +738,17 @@
           email = document.getElementById('custEmail').value,
           phone = document.getElementById('custPhone').value;
       if (!name || !email || !phone) { alert('Please fill in your contact info.'); return; }
+
+      // Re-check compliance even if the button state is stale: never save or
+      // print a quote with cameras but no video plan, or with no monitoring plan.
+      var vPlanSelected = false, vCamQty = 0, vHasCamAddon = false;
+      document.getElementsByName('basePlan').forEach(function(r) { if (r.checked) vPlanSelected = true; });
+      globalProducts.forEach(function(p, i) {
+        if (p.category === 'CCTV' || (p.type || '').toLowerCase() === 'cam') vCamQty += (quantities[i] || 0);
+      });
+      document.querySelectorAll('.is-cam-addon input[type="checkbox"]').forEach(function(cb) { if (cb.checked) vHasCamAddon = true; });
+      if (!vPlanSelected) { alert('Please choose a monitoring plan before saving your quote.'); return; }
+      if (vCamQty > 0 && !vHasCamAddon) { alert('Please select a camera monthly add-on plan to support your cameras.'); return; }
 
       var printedNow = false;
       if (actionType === 'Print') {
