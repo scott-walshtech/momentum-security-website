@@ -216,10 +216,11 @@
       <label><input type="radio" name="guardChoice" value="None" checked> None</label>
       <label><input type="radio" name="guardChoice" value="Guard"> Guard service (fill in below)</label>
     </div>
-    <div class="grid">
-      <div class="field"><label for="guardName">Guard name</label><input id="guardName" name="guardName" type="text"></div>
-      <div class="field"><label for="guardPhone">Guard phone</label><input id="guardPhone" name="guardPhone" type="tel"></div>
+    <div class="grid" id="guardFields" style="display:none">
+      <div class="field"><label for="guardName">Guard name <span class="req">*</span></label><input id="guardName" name="guardName" type="text"></div>
+      <div class="field"><label for="guardPhone">Guard phone</label><input id="guardPhone" name="guardPhone" type="tel" placeholder="306-555-0000"></div>
     </div>
+    <div id="guardError" class="error"></div>
   </div>
 
   <div class="card">
@@ -296,6 +297,24 @@ function checkedVal(name){
   const el = form.querySelector('[name="' + name + '"]:checked');
   return el ? el.value : "";
 }
+/* Guard: Guard Name / Guard Phone only appear when Guard service is
+   selected. When None is selected they stay hidden and are sent as "".
+   Guard Name's required flag is toggled here (a static required on a
+   hidden input would still block native validation). */
+const guardFields = document.getElementById("guardFields");
+const guardNameEl = document.getElementById("guardName");
+function updateGuardFields(){
+  const useGuard = checkedVal("guardChoice") === "Guard";
+  guardFields.style.display = useGuard ? "" : "none";
+  guardNameEl.required = useGuard;
+}
+form.querySelectorAll('[name="guardChoice"]').forEach(function(r){
+  r.addEventListener("change", function(){
+    document.getElementById("guardError").classList.remove("show");
+    updateGuardFields();
+  });
+});
+updateGuardFields();
 /* Dynamic call list: starts with 1 contact. "Add another contact" under
    ANY block appends a new block at the end. Max 10 in the form; beyond
    that, customers note extras in Response Notes. */
@@ -355,7 +374,9 @@ function collect(){
     reportEmail: val("reportEmail"),
     selfTest: checkedVal("selfTest"),
     guardChoice: checkedVal("guardChoice"),
-    guardName: val("guardName"), guardPhone: val("guardPhone"),
+    /* When None is selected, guard name/phone are sent as empty. */
+    guardName: checkedVal("guardChoice") === "None" ? "" : val("guardName"),
+    guardPhone: checkedVal("guardChoice") === "None" ? "" : val("guardPhone"),
     sitePassword: val("sitePassword"),
     paymentOption: checkedVal("paymentOption")
   };
@@ -454,6 +475,7 @@ let pendingData = null;
 form.addEventListener("submit", function(e){
   e.preventDefault();
   document.getElementById("callListError").classList.remove("show");
+  document.getElementById("guardError").classList.remove("show");
   statusEl.className = ""; statusEl.textContent = "";
 
   if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -464,6 +486,23 @@ form.addEventListener("submit", function(e){
     document.getElementById("callListError").classList.add("show");
     document.getElementById("callListError").scrollIntoView({ behavior: "smooth", block: "center" });
     return;
+  }
+  /* Guard: Guard Name is required when Guard service is selected.
+     Guard Phone is optional, but must look like a phone if filled. */
+  if (data.guardChoice === "Guard") {
+    const guardErr = document.getElementById("guardError");
+    if (!data.guardName) {
+      guardErr.textContent = "Please enter the guard's name, or select None if you do not use a guard service.";
+      guardErr.classList.add("show");
+      guardErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (data.guardPhone && data.guardPhone.replace(/\D/g, "").length < 7) {
+      guardErr.textContent = "Please enter a valid guard phone number (at least 7 digits), or leave it blank.";
+      guardErr.classList.add("show");
+      guardErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
   }
   pendingData = data;
   document.getElementById("reviewBody").innerHTML = buildReviewSummary(data);
