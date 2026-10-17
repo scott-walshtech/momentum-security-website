@@ -673,6 +673,12 @@
     </div>
   </div>
 
+  <div class="card">
+    <h2>Submitted By</h2>
+    <div class="field full"><label for="submittedBy">This form submitted by <span class="req">*</span></label><input id="submittedBy" name="submittedBy" type="text" required autocomplete="name" placeholder="Your full name"></div>
+    <p class="hint" style="margin-top:8px">The person filling out this form &mdash; this may be different from the account holder.</p>
+  </div>
+
   <div class="actions">
     <button type="submit" class="btn-primary" id="submitBtn">Review &rarr;</button>
   </div>
@@ -806,7 +812,8 @@ function collect(){
     /* When None is selected, guard name/phone are sent as empty. */
     guardName: checkedVal("guardChoice") === "None" ? "" : val("guardName"),
     guardPhone: checkedVal("guardChoice") === "None" ? "" : val("guardPhone"),
-    paymentOption: checkedVal("paymentOption")
+    paymentOption: checkedVal("paymentOption"),
+    submittedBy: val("submittedBy")
   };
 }
 
@@ -853,6 +860,7 @@ function buildSummary(d){
   h += row("Self-test", d.selfTest);
   h += row("Guard", d.guardChoice === "None" ? "None" : ("Guard — " + [d.guardName, d.guardPhone].filter(Boolean).join(", ")));
   h += row("Payment option (contract)", d.paymentOption);
+  h += row("This form submitted by", d.submittedBy);
   h += row("Submitted", new Date().toLocaleString("en-CA", { timeZone: "America/Regina" }));
   return h;
 }
@@ -892,6 +900,7 @@ function buildReviewSummary(d){
   h += row("Self-test", d.selfTest);
   h += row("Guard", d.guardChoice === "None" ? "None" : ("Guard — " + [d.guardName, d.guardPhone].filter(Boolean).join(", ")));
   h += row("Payment option (contract)", d.paymentOption);
+  h += row("This form submitted by", d.submittedBy);
   return h;
 }
 
