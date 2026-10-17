@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscriber Information Form — Momentum Security Systems</title>
+<meta name="description" content="Momentum Security Systems — Subscriber Information Form. Fill out online; your details come straight to us.">
+<style>
+  :root{
+    --navy:#000091; --cyan:#19fdff; --cyan2:#12b6e0; --ink:#1a1a2e;
+    --paper:#ffffff; --muted:#5a5a6a; --line:#d8dce6; --bg:#f2f4f8; --err:#b00020;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  .topbar{background:var(--navy);color:#fff;padding:14px 18px}
+  .topbar-inner{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .logo-mark{font-size:34px;line-height:1}
+  .brand h1{margin:0;font-size:22px;letter-spacing:.5px}
+  .brand p{margin:2px 0 0;color:var(--cyan);font-size:13px;letter-spacing:.4px}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px;margin:0 0 18px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .card h2{margin:0 0 4px;font-size:19px;color:var(--navy);border-bottom:3px solid var(--cyan);padding-bottom:8px}
+  .card p.note{margin:8px 0 0;color:var(--muted);font-size:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.full{grid-column:1/-1}
+  label{font-weight:600;font-size:14px}
+  label .req{color:var(--err)}
+  input[type=text],input[type=tel],input[type=email],select,textarea{
+    width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:15px;background:#fff;color:var(--ink)
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan2);box-shadow:0 0 0 3px rgba(18,182,224,.18)}
+  .hint{font-size:12.5px;color:var(--muted)}
+  .radio-row{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:4px}
+  .radio-row label,.check label{font-weight:400;display:flex;align-items:center;gap:7px;cursor:pointer}
+  .check{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:600}
+  .contact{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px}
+  .contact-wrap{margin-top:0}
+  .btn-add{background:#fff;color:var(--navy);border:2px dashed var(--navy);border-radius:999px;padding:10px 22px;font-size:15px;font-weight:700;margin-top:10px}
+  .btn-add:hover{background:#eef2ff}
+  .contact h3{margin:0 0 2px;font-size:16px;color:var(--navy)}
+  .contact .grid{margin-top:10px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg label{border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:14px}
+  .seg input{display:none}
+  .seg input:checked + span{background:var(--navy);color:#fff;border-radius:999px;padding:6px 12px;margin:-6px -12px}
+  .error{color:var(--err);font-size:14px;display:none;margin-top:8px}
+  .error.show{display:block}
+  .actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  button{cursor:pointer;border:0;border-radius:999px;padding:13px 26px;font-size:16px;font-weight:700}
+  .btn-primary{background:var(--navy);color:#fff}
+  .btn-primary:hover{background:#00006b}
+  .btn-ghost{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+  button:disabled{opacity:.6;cursor:wait}
+  #status{margin-top:12px;font-size:14px;min-height:20px}
+  #status.ok{color:#0a6b2e}
+  #status.bad{color:var(--err)}
+  /* Confirmation / print summary */
+  #confirmation{display:none}
+  #confirmation.show{display:block}
+  /* Review page (before anything is sent) */
+  #review{display:none}
+  #review.show{display:block}
+  .summary-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14.5px}
+  .summary-table th,.summary-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .summary-table th{width:34%;color:var(--navy);font-weight:700}
+  .print-note{color:var(--muted);font-size:13.5px;margin-top:10px}
+  .footer{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr} .topbar-inner{align-items:flex-start} }
+  @media print{
+    body{background:#fff}
+    .topbar,.footer,#subscriberForm,.no-print{display:none !important}
+    #review{display:none !important}
+    #review.show{display:block !important}
+    #confirmation{display:none !important}
+    #confirmation.show{display:block !important}
+    .wrap{padding:0;max-width:none}
+    .card{box-shadow:none;border:0;padding:0}
+  }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <div class="logo-mark" aria-hidden="true">&#x1F6E1;&#xFE0F;</div>
+  <div class="brand"><h1>MOMENTUM SECURITY SYSTEMS</h1><p>Subscriber Information Form &mdash; Regina, SK &nbsp;|&nbsp; 306-501-8050</p></div>
+</div></header>
+
+<main class="wrap">
+<form id="subscriberForm" novalidate>
+  <div class="card">
+    <h2>Service Address</h2>
+    <p class="note">The address where the alarm system is installed. This is the address we monitor.</p>
+    <div class="grid">
+      <div class="field full"><label for="fullName">Full name <span class="req">*</span></label><input id="fullName" name="fullName" type="text" required autocomplete="name"></div>
+      <div class="field full"><label for="street1">Street address (Street 1) <span class="req">*</span></label><input id="street1" name="street1" type="text" required autocomplete="street-address"></div>
+      <div class="field full"><label for="street2">Street address (Street 2 / Apt / Suite)</label><input id="street2" name="street2" type="text" autocomplete="address-line2"></div>
+      <div class="field"><label for="city">City / Town <span class="req">*</span></label><input id="city" name="city" type="text" required value="Regina" autocomplete="address-level2"></div>
+      <div class="field"><label for="province">Province <span class="req">*</span></label>
+        <select id="province" name="province" required>
+          <option value="">Select&hellip;</option><option>Alberta</option><option>British Columbia</option><option>Manitoba</option><option>New Brunswick</option><option>Newfoundland and Labrador</option><option>Northwest Territories</option><option>Nova Scotia</option><option>Nunavut</option><option>Ontario</option><option>Prince Edward Island</option><option>Quebec</option><option selected>Saskatchewan</option><option>Yukon</option>
+        </select></div>
+      <div class="field"><label for="postalCode">Postal code <span class="req">*</span></label><input id="postalCode" name="postalCode" type="text" required autocomplete="postal-code" placeholder="S4X 0A0"></div>
+      <div class="field"><label for="sitePhone">Site phone</label><input id="sitePhone" name="sitePhone" type="tel" autocomplete="tel"></div>
+      <div class="field"><label for="mobile">Mobile</label><input id="mobile" name="mobile" type="tel" autocomplete="tel"></div>
+      <div class="field full"><label for="email">Email <span class="req">*</span></label><input id="email" name="email" type="email" required autocomplete="email"></div>
+      <div class="field full"><label for="prevProvider">Previous provider (if any)</label><input id="prevProvider" name="prevProvider" type="text" placeholder="e.g. TELUS"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Billing Address</h2>
+    <label class="check"><input type="checkbox" id="billingSame" name="billingSame" checked> Billing address is the same as the service address</label>
+    <div id="billingFields" style="display:none">
+      <div class="grid">
+        <div class="field full"><label for="billName">Billing name</label><input id="billName" name="billName" type="text" autocomplete="name"></div>
+        <div class="field full"><label for="billStreet1">Billing street address (Street 1)</label><input id="billStreet1" name="billStreet1" type="text"></div>
+        <div class="field full"><label for="billStreet2">Billing street address (Street 2 / Apt / Suite)</label><input id="billStreet2" name="billStreet2" type="text"></div>
+        <div class="field"><label for="billCity">Billing city / town</label><input id="billCity" name="billCity" type="text"></div>
+        <div class="field"><label for="billProvince">Billing province</label>
+          <select id="billProvince" name="billProvince">
+            <option value="">Select&hellip;</option><option>Alberta</option><option>British Columbia</option><option>Manitoba</option><option>New Brunswick</option><option>Newfoundland and Labrador</option><option>Northwest Territories</option><option>Nova Scotia</option><option>Nunavut</option><option>Ontario</option><option>Prince Edward Island</option><option>Quebec</option><option>Saskatchewan</option><option>Yukon</option>
+          </select></div>
+        <div class="field"><label for="billPostal">Billing postal code</label><input id="billPostal" name="billPostal" type="text"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Phones</h2>
+    <div class="grid">
+      <div class="field"><label for="phone1">Phone 1 <span class="req">*</span></label><input id="phone1" name="phone1" type="tel" required placeholder="306-555-0000"></div>
+      <div class="field"><label for="phone2">Phone 2</label><input id="phone2" name="phone2" type="tel" placeholder="306-555-0000"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Call List</h2>
+    <p class="note">People the monitoring station calls after an alarm. Start with one contact and use <strong>Add another contact</strong> underneath to add more, up to 10. At least one contact is required. Verbal passwords are kept private &mdash; they go to our secure sheet only and are never emailed. If you need more than 10 contacts, note the extras in Response Notes.</p>
+    <div id="callListError" class="error">Please add at least one call-list contact with a full name and a telephone number.</div>
+
+    <div id="callListBlocks">
+    <div class="contact-wrap">
+    <div class="contact" data-contact="1">
+      <h3>Contact 1</h3>
+      <div class="grid">
+        <div class="field full"><label for="c1Name">Full name</label><input id="c1Name" name="c1Name" type="text"></div>
+        <div class="field"><label for="c1Password">Verbal password</label><input id="c1Password" name="c1Password" type="text" autocomplete="off"><span class="hint">Kept private &mdash; secure sheet only.</span></div>
+        <div class="field"><label for="c1Phone1">Telephone 1</label><input id="c1Phone1" name="c1Phone1" type="tel"></div>
+        <div class="field"><label for="c1Phone2">Telephone 2</label><input id="c1Phone2" name="c1Phone2" type="tel"></div>
+        <div class="field"><label>Keys?</label><div class="seg"><label><input type="radio" name="c1Keys" value="Yes"><span>Yes</span></label><label><input type="radio" name="c1Keys" value="No" checked><span>No</span></label></div></div>
+        <div class="field"><label>Changes? (may authorise changes)</label><div class="seg"><label><input type="radio" name="c1Changes" value="Yes"><span>Yes</span></label><label><input type="radio" name="c1Changes" value="No" checked><span>No</span></label></div></div>
+      </div>
+    </div>
+    <button type="button" class="btn-add add-contact-btn">Add another contact</button>
+    </div>
+    </div>
+
+    <template id="contactTemplate">
+    <div class="contact-wrap">
+    <div class="contact" data-contact="__N__">
+      <h3>Contact __N__</h3>
+      <div class="grid">
+        <div class="field full"><label for="c__N__Name">Full name</label><input id="c__N__Name" name="c__N__Name" type="text"></div>
+        <div class="field"><label for="c__N__Password">Verbal password</label><input id="c__N__Password" name="c__N__Password" type="text" autocomplete="off"><span class="hint">Kept private &mdash; secure sheet only.</span></div>
+        <div class="field"><label for="c__N__Phone1">Telephone 1</label><input id="c__N__Phone1" name="c__N__Phone1" type="tel"></div>
+        <div class="field"><label for="c__N__Phone2">Telephone 2</label><input id="c__N__Phone2" name="c__N__Phone2" type="tel"></div>
+        <div class="field"><label>Keys?</label><div class="seg"><label><input type="radio" name="c__N__Keys" value="Yes"><span>Yes</span></label><label><input type="radio" name="c__N__Keys" value="No" checked><span>No</span></label></div></div>
+        <div class="field"><label>Changes? (may authorise changes)</label><div class="seg"><label><input type="radio" name="c__N__Changes" value="Yes"><span>Yes</span></label><label><input type="radio" name="c__N__Changes" value="No" checked><span>No</span></label></div></div>
+      </div>
+    </div>
+    <button type="button" class="btn-add add-contact-btn">Add another contact</button>
+    </div>
+    </template>
+  </div>
+
+  <div class="card">
+    <h2>Response Instructions</h2>
+    <p class="note">What should the monitoring station do on a burglary alarm?</p>
+    <div class="radio-row">
+      <label><input type="radio" name="burglaryResponse" value="Police dispatch" checked> Police dispatch</label>
+      <label><input type="radio" name="burglaryResponse" value="Call contacts only"> Call contacts only (NO police dispatch on burglary)</label>
+    </div>
+    <div class="field full" style="margin-top:12px"><label for="responseNotes">Other response notes</label><textarea id="responseNotes" name="responseNotes" rows="2" placeholder="Anything else the station should know"></textarea></div>
+  </div>
+
+  <div class="card">
+    <h2>Reports</h2>
+    <div class="grid">
+      <div class="field"><label>Report type</label>
+        <div class="radio-row">
+          <label><input type="radio" name="reportType" value="All activity" checked> All activity</label>
+          <label><input type="radio" name="reportType" value="Alarms only"> Alarms only</label>
+        </div></div>
+      <div class="field"><label>Frequency</label>
+        <div class="radio-row">
+          <label><input type="radio" name="reportFreq" value="Daily"> Daily</label>
+          <label><input type="radio" name="reportFreq" value="Weekly" checked> Weekly</label>
+          <label><input type="radio" name="reportFreq" value="Monthly"> Monthly</label>
+        </div></div>
+      <div class="field full"><label for="reportEmail">Report email</label><input id="reportEmail" name="reportEmail" type="email" placeholder="Same as contact email if left blank"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Self-Test</h2>
+    <div class="radio-row">
+      <label><input type="radio" name="selfTest" value="Monthly" checked> Monthly</label>
+      <label><input type="radio" name="selfTest" value="Weekly"> Weekly</label>
+      <label><input type="radio" name="selfTest" value="Daily"> Daily</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Guard Service</h2>
+    <div class="radio-row">
+      <label><input type="radio" name="guardChoice" value="None" checked> None</label>
+      <label><input type="radio" name="guardChoice" value="Guard"> Guard service (fill in below)</label>
+    </div>
+    <div class="grid">
+      <div class="field"><label for="guardName">Guard name</label><input id="guardName" name="guardName" type="text"></div>
+      <div class="field"><label for="guardPhone">Guard phone</label><input id="guardPhone" name="guardPhone" type="tel"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Site Password &amp; Payment Option</h2>
+    <div class="grid">
+      <div class="field"><label for="sitePassword">Site password (2&ndash;10 characters, optional)</label><input id="sitePassword" name="sitePassword" type="text" maxlength="10" autocomplete="off"></div>
+    </div>
+    <div style="margin-top:14px">
+      <label>Payment option &mdash; for your CONTRACT only (not sent to LANVAC). Choose one. <span class="req">*</span></label>
+      <div class="radio-row" style="margin-top:8px">
+        <label><input type="radio" name="paymentOption" value="Invoice-Monthly" checked> Invoice-Monthly</label>
+        <label><input type="radio" name="paymentOption" value="Invoice-Quarterly"> Invoice-Quarterly</label>
+        <label><input type="radio" name="paymentOption" value="Invoice-Annually"> Invoice-Annually</label>
+        <label><input type="radio" name="paymentOption" value="Credit Card"> Credit Card</label>
+        <label><input type="radio" name="paymentOption" value="Prepay - 3 Months"> Prepay &ndash; 3 Months</label>
+        <label><input type="radio" name="paymentOption" value="Prepay - 6 Months"> Prepay &ndash; 6 Months</label>
+        <label><input type="radio" name="paymentOption" value="Prepay - 1 Year"> Prepay &ndash; 1 Year</label>
+      </div>
+      <p class="hint" style="margin-top:8px">Pre-authorized Debit is not offered yet. If you would like it, tell us and we can set it up.</p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn-primary" id="submitBtn">Review &rarr;</button>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+  <p class="hint">Nothing is sent until you review and click Submit on the next page. This form collects your monitoring setup details only. It is not signed &mdash; your signature goes on the separate DocuSeal monitoring agreement (Form M1V2), which we will send you next.</p>
+</form>
+
+<section id="review" class="card" aria-live="polite">
+  <h2>Review &mdash; check everything before you submit</h2>
+  <p class="note">Nothing has been sent yet. Check every detail below. To fix something, go back and edit &mdash; your entries are preserved. To send it to Momentum, click Submit.</p>
+  <table class="summary-table"><tbody id="reviewBody"></tbody></table>
+  <div class="actions no-print">
+    <button type="button" class="btn-ghost" id="backBtn">&larr; Go Back / Edit</button>
+    <button type="button" class="btn-ghost" id="reviewPrintBtn">Print / Save as PDF</button>
+    <button type="button" class="btn-primary" id="reviewSubmitBtn">Submit</button>
+  </div>
+  <p class="print-note">Print / Save is only available after you submit. Click Submit first, then print/save from the confirmation page.</p>
+</section>
+
+<section id="confirmation" class="card" aria-live="polite">
+  <h2>Success &mdash; your Subscriber Information was received</h2>
+  <p class="note">Below is a copy of what you submitted, for your own records. You can print it or save it as a PDF. We do <strong>not</strong> email you a copy automatically.</p>
+  <table class="summary-table"><tbody id="summaryBody"></tbody></table>
+  <div class="actions no-print">
+    <button type="button" class="btn-primary" onclick="window.print()">Print / Save as PDF</button>
+    <button type="button" class="btn-ghost" onclick="window.location.reload()">Submit another form</button>
+  </div>
+  <p class="print-note">Tip: in the print dialog, choose &ldquo;Save as PDF&rdquo; as the destination to save a copy instead of printing.</p>
+</section>
+
+<p class="footer">Momentum Security Systems &middot; Regina, SK &middot; 306-501-8050 &middot; momentumsecurity.ca</p>
+</main>
+
+<script>
+/* ---- SETUP: Scott pastes the deployed Apps Script Web App URL here ---- */
+const FORM_ACTION = "https://script.google.com/macros/s/AKfycbwjsXwUx4PsfV9-ekV10ALdBeWdLfomh9fjHIghmDPjLE4ykPTXmIZ1ulBufY420eqP/exec";
+
+const form = document.getElementById("subscriberForm");
+const statusEl = document.getElementById("status");
+const billingSame = document.getElementById("billingSame");
+const billingFields = document.getElementById("billingFields");
+
+billingSame.addEventListener("change", () => {
+  billingFields.style.display = billingSame.checked ? "none" : "block";
+});
+
+function val(name){
+  const el = form.querySelector('[name="' + name + '"]');
+  return el ? el.value.trim() : "";
+}
+function checkedVal(name){
+  const el = form.querySelector('[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+/* Dynamic call list: starts with 1 contact. "Add another contact" under
+   ANY block appends a new block at the end. Max 10 in the form; beyond
+   that, customers note extras in Response Notes. */
+const MAX_CONTACTS = 10;
+const callListBlocks = document.getElementById("callListBlocks");
+function contactCount(){ return callListBlocks.querySelectorAll(".contact").length; }
+function updateAddButtons(){
+  const atMax = contactCount() >= MAX_CONTACTS;
+  callListBlocks.querySelectorAll(".add-contact-btn").forEach(function(b){
+    b.style.display = atMax ? "none" : "";
+    b.disabled = atMax;
+  });
+}
+callListBlocks.addEventListener("click", function(e){
+  const btn = e.target.closest(".add-contact-btn");
+  if (!btn) return;
+  if (contactCount() >= MAX_CONTACTS) return;
+  const n = contactCount() + 1;
+  const tpl = document.getElementById("contactTemplate").innerHTML.replaceAll("__N__", String(n));
+  const wrap = document.createElement("div");
+  wrap.className = "contact-wrap";
+  wrap.innerHTML = tpl;
+  callListBlocks.appendChild(wrap);
+  updateAddButtons();
+});
+updateAddButtons();
+
+function collect(){
+  const billingSameChecked = billingSame.checked;
+  return {
+    fullName: val("fullName"),
+    street1: val("street1"), street2: val("street2"),
+    city: val("city"), province: val("province"), postalCode: val("postalCode"),
+    sitePhone: val("sitePhone"), mobile: val("mobile"), email: val("email"),
+    prevProvider: val("prevProvider"),
+    phone1: val("phone1"), phone2: val("phone2"),
+    billingSame: billingSameChecked ? "Yes" : "No",
+    billName: billingSameChecked ? "" : val("billName"),
+    billStreet1: billingSameChecked ? "" : val("billStreet1"),
+    billStreet2: billingSameChecked ? "" : val("billStreet2"),
+    billCity: billingSameChecked ? "" : val("billCity"),
+    billProvince: billingSameChecked ? "" : val("billProvince"),
+    billPostal: billingSameChecked ? "" : val("billPostal"),
+    contacts: Array.prototype.map.call(document.querySelectorAll("#callListBlocks .contact"), function(block){
+      function bv(suffix){ const el = block.querySelector('[name$="' + suffix + '"]'); return el ? el.value.trim() : ""; }
+      function rv(suffix){ const el = block.querySelector('[name$="' + suffix + '"]:checked'); return el ? el.value : ""; }
+      return {
+        name: bv("Name"), password: bv("Password"),
+        phone1: bv("Phone1"), phone2: bv("Phone2"),
+        keys: rv("Keys"), changes: rv("Changes")
+      };
+    }),
+    burglaryResponse: checkedVal("burglaryResponse"),
+    responseNotes: val("responseNotes"),
+    reportType: checkedVal("reportType"),
+    reportFreq: checkedVal("reportFreq"),
+    reportEmail: val("reportEmail"),
+    selfTest: checkedVal("selfTest"),
+    guardChoice: checkedVal("guardChoice"),
+    guardName: val("guardName"), guardPhone: val("guardPhone"),
+    sitePassword: val("sitePassword"),
+    paymentOption: checkedVal("paymentOption")
+  };
+}
+
+/* Confirmation summary: everything EXCEPT verbal passwords.
+   Passwords are never rendered on screen after submit and never emailed. */
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function row(label, value){
+  if (value === "" || value == null) return "";
+  return "<tr><th>" + esc(label) + "</th><td>" + esc(value) + "</td></tr>";
+}
+function buildSummary(d){
+  let h = "";
+  h += row("Full name", d.fullName);
+  h += row("Service address", [d.street1, d.street2, d.city, d.province, d.postalCode].filter(Boolean).join(", "));
+  h += row("Site phone", d.sitePhone);
+  h += row("Mobile", d.mobile);
+  h += row("Email", d.email);
+  h += row("Previous provider", d.prevProvider);
+  h += row("Phone 1", d.phone1);
+  h += row("Phone 2", d.phone2);
+  if (d.billingSame === "Yes") {
+    h += row("Billing address", "Same as service address");
+  } else {
+    h += row("Billing name", d.billName);
+    h += row("Billing address", [d.billStreet1, d.billStreet2, d.billCity, d.billProvince, d.billPostal].filter(Boolean).join(", "));
+  }
+  d.contacts.forEach(function(c, i){
+    if (!c.name && !c.phone1) return;
+    h += row("Call list " + (i+1) + " — name", c.name);
+    h += row("Call list " + (i+1) + " — telephone 1", c.phone1);
+    h += row("Call list " + (i+1) + " — telephone 2", c.phone2);
+    h += row("Call list " + (i+1) + " — keys", c.keys);
+    h += row("Call list " + (i+1) + " — changes", c.changes);
+    h += row("Call list " + (i+1) + " — verbal password", "(kept private — on file with Momentum, not shown here)");
+  });
+  h += row("Burglary response", d.burglaryResponse);
+  h += row("Other response notes", d.responseNotes);
+  h += row("Reports", d.reportType + " — " + d.reportFreq);
+  h += row("Report email", d.reportEmail || d.email);
+  h += row("Self-test", d.selfTest);
+  h += row("Guard", d.guardChoice === "None" ? "None" : ("Guard — " + [d.guardName, d.guardPhone].filter(Boolean).join(", ")));
+  h += row("Site password", d.sitePassword ? "(on file — not shown here)" : "");
+  h += row("Payment option (contract)", d.paymentOption);
+  h += row("Submitted", new Date().toLocaleString("en-CA", { timeZone: "America/Regina" }));
+  return h;
+}
+
+/* Review summary: FULL values, including verbal passwords and site password,
+   so the customer can check for typos BEFORE anything is sent.
+   This is their own data on their own screen, pre-send. */
+function buildReviewSummary(d){
+  let h = "";
+  h += row("Full name", d.fullName);
+  h += row("Service address", [d.street1, d.street2, d.city, d.province, d.postalCode].filter(Boolean).join(", "));
+  h += row("Site phone", d.sitePhone);
+  h += row("Mobile", d.mobile);
+  h += row("Email", d.email);
+  h += row("Previous provider", d.prevProvider);
+  h += row("Phone 1", d.phone1);
+  h += row("Phone 2", d.phone2);
+  if (d.billingSame === "Yes") {
+    h += row("Billing address", "Same as service address");
+  } else {
+    h += row("Billing name", d.billName);
+    h += row("Billing address", [d.billStreet1, d.billStreet2, d.billCity, d.billProvince, d.billPostal].filter(Boolean).join(", "));
+  }
+  d.contacts.forEach(function(c, i){
+    if (!c.name && !c.phone1) return;
+    h += row("Call list " + (i+1) + " — name", c.name);
+    h += row("Call list " + (i+1) + " — verbal password", c.password);
+    h += row("Call list " + (i+1) + " — telephone 1", c.phone1);
+    h += row("Call list " + (i+1) + " — telephone 2", c.phone2);
+    h += row("Call list " + (i+1) + " — keys", c.keys);
+    h += row("Call list " + (i+1) + " — changes", c.changes);
+  });
+  h += row("Burglary response", d.burglaryResponse);
+  h += row("Other response notes", d.responseNotes);
+  h += row("Reports", d.reportType + " — " + d.reportFreq);
+  h += row("Report email", d.reportEmail || d.email);
+  h += row("Self-test", d.selfTest);
+  h += row("Guard", d.guardChoice === "None" ? "None" : ("Guard — " + [d.guardName, d.guardPhone].filter(Boolean).join(", ")));
+  h += row("Site password", d.sitePassword);
+  h += row("Payment option (contract)", d.paymentOption);
+  return h;
+}
+
+let pendingData = null;
+
+/* Step 1: Form → Review. Nothing is sent here. */
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+  document.getElementById("callListError").classList.remove("show");
+  statusEl.className = ""; statusEl.textContent = "";
+
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+
+  const data = collect();
+  const hasContact = data.contacts.some(function(c){ return c.name !== "" && c.phone1 !== ""; });
+  if (!hasContact) {
+    document.getElementById("callListError").classList.add("show");
+    document.getElementById("callListError").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  pendingData = data;
+  document.getElementById("reviewBody").innerHTML = buildReviewSummary(data);
+  form.style.display = "none";
+  const rev = document.getElementById("review");
+  rev.classList.add("show");
+  rev.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+/* Review: Go Back / Edit — returns to the form, values preserved, nothing sent. */
+document.getElementById("backBtn").addEventListener("click", function(){
+  document.getElementById("review").classList.remove("show");
+  form.style.display = "";
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+/* Review: Print / Save button is visible but does NOT print before submit.
+   Enforces submit-before-print/save: warn, do not print. */
+document.getElementById("reviewPrintBtn").addEventListener("click", function(){
+  alert("You need to submit the form before you can print or save a copy. Please click Submit first, then print/save from the confirmation page.");
+});
+
+/* Step 2: Review → Submit. ONLY here does anything get sent. */
+document.getElementById("reviewSubmitBtn").addEventListener("click", async function(){
+  if (!pendingData) return;
+  if (FORM_ACTION.indexOf("PASTE_YOUR") === 0) {
+    statusEl.className = "bad";
+    statusEl.textContent = "This form is not connected yet — the Apps Script URL has not been pasted in. Please contact Momentum and we will send you a working link.";
+    document.getElementById("review").classList.remove("show");
+    form.style.display = "";
+    return;
+  }
+  const btn = document.getElementById("reviewSubmitBtn");
+  btn.disabled = true; btn.textContent = "Submitting…";
+  try {
+    const res = await fetch(FORM_ACTION, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(pendingData)
+    });
+    const out = await res.json().catch(function(){ return {}; });
+    if (!res.ok || out.result !== "ok") throw new Error(out.error || ("HTTP " + res.status));
+    /* Step 3: Success page — same summary, but passwords masked (the printable record). */
+    document.getElementById("summaryBody").innerHTML = buildSummary(pendingData);
+    document.getElementById("review").classList.remove("show");
+    const conf = document.getElementById("confirmation");
+    conf.classList.add("show");
+    conf.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (err) {
+    statusEl.className = "bad";
+    statusEl.textContent = "Sorry — something went wrong sending this. Please try again, or call/text Momentum at 306-501-8050. (" + err.message + ")";
+    document.getElementById("review").classList.remove("show");
+    form.style.display = "";
+    btn.disabled = false; btn.textContent = "Submit";
+  }
+});
+</script>
+</body>
+</html>
